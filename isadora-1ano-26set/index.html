@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Isadora 1 ano</title>
+    <title>Isadora 1 Ano</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         body { background:#000; overflow:hidden; height:100dvh; display:flex; justify-content:center; align-items:center; font-family:sans-serif; }
@@ -31,7 +31,7 @@
 </head>
 <body>
 <div class="app-container">
-    <audio id="m" src="https://res.cloudinary.com/igtlabss/video/upload/v1790390919/audio_ity5pw.mp3" loop preload="auto"></audio>
+    <audio id="m" src="https://res.cloudinary.com/igtlabss/video/upload/v1790390919/audio_ity5pw.mp3" loop preload="auto" crossorigin="anonymous"></audio>
     <button id="btn-s" onclick="t()">II</button>
     <button id="skip" onclick="g(3)">PULAR</button>
 
@@ -48,10 +48,10 @@
     </div>
 
     <div class="page active" id="pg1" onclick="s(this)"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/capa_oqzstx.jpg"></div></div>
-<div class="page " id="pg2" ><div class="media-wrapper"><video id="v2" src="https://res.cloudinary.com/igtlabss/video/upload/v1790443342/pag2_f9rpbv.mp4" playsinline muted></video></div></div>
-<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/5zshGUCtz9PWZNaQ8" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:54.26%; left:28.44%; width:19.45%; height:19.45%;"></a>
-<a href="https://558398579634" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:54.09%; left:50.31%; width:17.37%; height:17.37%;"></a>
-<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:53.74%; left:70.31%; width:18.80%; height:18.80%;"></div>
+<div class="page " id="pg2" ><div class="media-wrapper"><video id="v2" src="https://res.cloudinary.com/igtlabss/video/upload/v1790443342/pag2_f9rpbv.mp4" playsinline muted crossorigin="anonymous"></video></div></div>
+<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/5zshGUCtz9PWZNaQ8" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:55.14%; left:27.19%; width:20.89%; height:20.89%;"></a>
+<div class="hotspot" onclick="s(); event.stopPropagation(); abrirForm('558398579634')" style="top:53.56%; left:49.69%; width:20.43%; height:20.43%;"></div>
+<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:53.21%; left:70.94%; width:19.85%; height:19.85%;"></div>
 </div>
 <div class="page " id="pg4" onclick="rv()"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag4_hktebn.jpg"></div></div>
 
@@ -77,119 +77,187 @@
     const mu=document.getElementById('m'), btn=document.getElementById('btn-s'), sk=document.getElementById('skip'), tm=document.getElementById('timer-wrapper');
     const hasP2 = true, hasP3 = true;
     let lastPg = 1, iniciado = false, currentZap = "";
-    
-    // ÁUDIO PRINCIPAL — permanece ativo durante toda a navegação.
-    // No Safari/iPhone, reafirma a sessão "playback" antes de iniciar/recuperar o som.
-    function pedirSessaoDeAudio(){
-        try {
-            if (navigator.audioSession) {
-                navigator.audioSession.type = 'playback';
-            }
-        } catch(e) {}
+
+    // ================================================================
+    // ÁUDIO iPHONE — MIXADOR DE ÁUDIO
+    // O iOS pode impedir que um <audio> e um <video> com áudio sejam
+    // reproduzidos como dois fluxos independentes. No iPhone/iPad,
+    // usamos o Web Audio para transformar os dois em UMA saída de áudio.
+    // Android e desktop continuam usando o comportamento original.
+    // ================================================================
+    let audioCtx = null;
+    let mainSource = null;
+    let mainGain = null;
+    let masterGain = null;
+    const videoSources = new WeakMap();
+    let mixerIOSAtivo = false;
+
+    function ehIOS(){
+        return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+               (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
 
-    // Flag para diferenciar uma pausa feita pelo convidado de uma eventual
-    // interrupção/perda de sessão do Safari.
-    let audioPausadoPeloUsuario = false;
+    function pedirSessaoDeAudio(){
+        try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e) {}
+    }
 
-    // Inicia ou recupera SOMENTE o áudio principal.
-    // Não reinicia o áudio se ele já estiver tocando.
-    function tocarAudioPrincipal(){
-        if(!mu) return;
+    function criarMixerIOS(){
+        if(!ehIOS() || audioCtx) return !!audioCtx;
+        if(!true) return false;
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if(!Ctx) return false;
 
-        pedirSessaoDeAudio();
-        mu.muted = false;
-        mu.volume = 0.8;
-
-        if(!mu.paused) return;
-
-        const tentativa = mu.play();
-        if(tentativa && typeof tentativa.catch === 'function'){
-            tentativa.catch((erro)=>{
-                // O Safari pode recusar uma tentativa de recuperação fora de
-                // um gesto direto. Não interrompemos a navegação nem o vídeo.
-                console.warn('Áudio principal não pôde ser reproduzido neste momento.', erro);
-            });
+        try {
+            audioCtx = new Ctx();
+            mainSource = audioCtx.createMediaElementSource(mu);
+            mainGain = audioCtx.createGain();
+            masterGain = audioCtx.createGain();
+            mainGain.gain.value = 1;
+            masterGain.gain.value = 1;
+            mainSource.connect(mainGain).connect(masterGain).connect(audioCtx.destination);
+            mixerIOSAtivo = true;
+            return true;
+        } catch(e) {
+            console.warn('Mixer de áudio do iPhone não pôde ser criado.', e);
+            audioCtx = null;
+            mainSource = null;
+            mainGain = null;
+            masterGain = null;
+            mixerIOSAtivo = false;
+            return false;
         }
     }
 
-    // Ao trocar de página, para e remuta qualquer vídeo que não seja o da página atual,
-    // pra não deixar o áudio de um vídeo antigo (ex: pulado) tocando escondido.
+    function prepararVideoNoMixer(video){
+        if(!mixerIOSAtivo || !video) return false;
+        if(videoSources.has(video)) return true;
+
+        try {
+            const source = audioCtx.createMediaElementSource(video);
+            const gain = audioCtx.createGain();
+            gain.gain.value = 0;
+            source.connect(gain).connect(masterGain);
+            videoSources.set(video, gain);
+            return true;
+        } catch(e) {
+            console.warn('Áudio do vídeo não pôde ser ligado ao mixer.', e);
+            return false;
+        }
+    }
+
+    function iniciarMixerIOS(){
+        if(!ehIOS()) return false;
+        const criado = criarMixerIOS();
+        if(!criado) return false;
+
+        try {
+            if(audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+        } catch(e) {}
+        return true;
+    }
+
+    function volumeVideoNoMixer(video, valor){
+        if(!mixerIOSAtivo || !video) return;
+        const gain = videoSources.get(video);
+        if(gain) gain.gain.value = valor;
+    }
+
     function pararVideosOcultos(atual){
         document.querySelectorAll('.page video').forEach(v=>{
-            if(v !== atual){ v.pause(); v.muted = true; }
+            if(v !== atual){
+                v.pause();
+                if(mixerIOSAtivo){
+                    volumeVideoNoMixer(v, 0);
+                    v.muted = true;
+                } else {
+                    v.muted = true;
+                }
+            }
         });
     }
+
     function tocarPagina(n){
         const pagina = document.getElementById('pg'+n);
         const video = pagina ? pagina.querySelector('video') : null;
         pararVideosOcultos(video);
-        if(video){ video.muted = false; video.play().catch(()=>{}); }
+
+        if(video){
+            if(mixerIOSAtivo){
+                prepararVideoNoMixer(video);
+                volumeVideoNoMixer(video, 1);
+                // O áudio do vídeo deixa de sair pelo caminho nativo e passa
+                // pelo mesmo destino do áudio principal, sendo misturado pelo Web Audio.
+                video.muted = false;
+            } else {
+                video.muted = false;
+            }
+            video.play().catch((erro)=>console.warn('Vídeo não pôde iniciar.', erro));
+        }
+    }
+
+    function tocarAudioPrincipal(){
+        if(!mu) return;
+        pedirSessaoDeAudio();
+        mu.muted = false;
+        mu.volume = 0.8;
+        try {
+            if(mixerIOSAtivo && audioCtx && audioCtx.state === 'suspended') audioCtx.resume().catch(()=>{});
+        } catch(e) {}
+        if(mu.paused){
+            const tentativa = mu.play();
+            if(tentativa && typeof tentativa.catch === 'function') tentativa.catch((erro)=>console.warn('Áudio principal não pôde ser reproduzido.', erro));
+        }
     }
 
     function s(el){ 
         if(iniciado) return; iniciado = true;
         if(el && el.tagName === 'DIV') el.removeAttribute('onclick');
-
-        // O primeiro play continua acontecendo dentro do gesto do usuário.
-        // Isso preserva a política de autoplay e o comportamento atual.
-        audioPausadoPeloUsuario = false;
+        
         pedirSessaoDeAudio();
-        mu.muted = false;
+        // CRÍTICO NO iPHONE: cria/resume o AudioContext dentro do toque do usuário.
+        iniciarMixerIOS();
+        
+        mu.load(); 
         mu.volume = 0.8;
-        mu.load();
+        mu.muted = false;
         tocarAudioPrincipal();
-
+        
         btn.style.display='flex'; 
         if (hasP2) { 
             if("sim"==='sim' && hasP3) sk.style.display='block'; 
             g(2); 
             const v2=document.getElementById('v2'); 
-            if(v2 && v2.tagName==='VIDEO'){ v2.onended=()=> { if(hasP3) g(3); } }
+            if(v2 && v2.tagName==='VIDEO'){ 
+                v2.onended=()=> { 
+                    volumeVideoNoMixer(v2, 0);
+                    if(hasP3) g(3); 
+                } 
+            }
             else if(hasP3) { setTimeout(()=>g(3),4000); } 
         } else {
             g(1);
         }
     }
-
-    function g(n){ 
-        if(n <= 3) lastPg = n; 
-        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        if(n==3 || (!hasP3 && n==2) || (!hasP2 && n==1) || n > 3) sk.style.display='none';
-        else if ("sim"==='sim' && hasP3 && n < 3) sk.style.display='block';
-        tm.style.display = ("nao"==='sim' && n=="3") ? 'block' : 'none';
-        const t=document.getElementById('pg'+n); 
-        if(t){
-            t.classList.add('active'); 
-            if(iniciado) tocarPagina(n);
-        }
-    }
-
-    // Se o Safari/iPhone perder a sessão ao voltar para a aba ou página,
-    // tenta recuperar somente o áudio principal. Se o convidado o pausou,
-    // respeita essa escolha.
+    
     document.addEventListener('visibilitychange', ()=>{
-        if(document.visibilityState === 'visible' && iniciado && !audioPausadoPeloUsuario){
-            tocarAudioPrincipal();
-        }
+        if(document.visibilityState === 'visible' && iniciado && !mu.paused) tocarAudioPrincipal();
     });
     window.addEventListener('pageshow', ()=>{
-        if(iniciado && !audioPausadoPeloUsuario){
-            tocarAudioPrincipal();
-        }
+        if(iniciado && !mu.paused) tocarAudioPrincipal();
     });
-
+    
     function rv(){ g(lastPg); } 
-    function t(){ 
+    function t(){
         if(mu.paused){
-            audioPausadoPeloUsuario = false;
+            pedirSessaoDeAudio();
+            iniciarMixerIOS();
             tocarAudioPrincipal();
+            btn.innerText='II';
         } else {
-            audioPausadoPeloUsuario = true;
             mu.pause();
+            btn.innerText='▶';
         }
     }
-
     function abrirForm(z){ currentZap = z; document.getElementById('form-modal').style.display='flex'; }
     
     function enviarWhats() {
