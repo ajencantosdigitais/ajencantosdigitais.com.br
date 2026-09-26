@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Isadora 1 Ano</title>
+    <title>Isadora 1 ano</title>
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
         body { background:#000; overflow:hidden; height:100dvh; display:flex; justify-content:center; align-items:center; font-family:sans-serif; }
@@ -49,9 +49,9 @@
 
     <div class="page active" id="pg1" onclick="s(this)"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/capa_oqzstx.jpg"></div></div>
 <div class="page " id="pg2" ><div class="media-wrapper"><video id="v2" src="https://res.cloudinary.com/igtlabss/video/upload/v1790443342/pag2_f9rpbv.mp4" playsinline muted crossorigin="anonymous"></video></div></div>
-<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/5zshGUCtz9PWZNaQ8" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:55.14%; left:27.19%; width:20.89%; height:20.89%;"></a>
-<div class="hotspot" onclick="s(); event.stopPropagation(); abrirForm('558398579634')" style="top:53.56%; left:49.69%; width:20.43%; height:20.43%;"></div>
-<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:53.21%; left:70.94%; width:19.85%; height:19.85%;"></div>
+<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/hZo8YRncubRLyq2d7" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:54.09%; left:26.88%; width:21.55%; height:21.55%;"></a>
+<a href="https://558398579634" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:54.44%; left:49.06%; width:18.58%; height:18.58%;"></a>
+<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:53.74%; left:70.94%; width:19.25%; height:19.25%;"></div>
 </div>
 <div class="page " id="pg4" onclick="rv()"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag4_hktebn.jpg"></div></div>
 
@@ -245,6 +245,19 @@
     window.addEventListener('pageshow', ()=>{
         if(iniciado && !mu.paused) tocarAudioPrincipal();
     });
+    
+    function g(n){ 
+        if(n <= 3) lastPg = n; 
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        if(n==3 || (!hasP3 && n==2) || (!hasP2 && n==1) || n > 3) sk.style.display='none';
+        else if ("sim"==='sim' && hasP3 && n < 3) sk.style.display='block';
+        tm.style.display = ("nao"==='sim' && n=="3") ? 'block' : 'none';
+        const t=document.getElementById('pg'+n); 
+        if(t){
+            t.classList.add('active'); 
+            if(iniciado) tocarPagina(n);
+        }
+    }
     
     function rv(){ g(lastPg); } 
     function t(){
