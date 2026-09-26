@@ -49,9 +49,9 @@
 
     <div class="page active" id="pg1" onclick="s(this)"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/capa_oqzstx.jpg"></div></div>
 <div class="page " id="pg2" ><div class="media-wrapper"><video id="v2" src="https://res.cloudinary.com/igtlabss/video/upload/v1790443342/pag2_f9rpbv.mp4" playsinline muted></video></div></div>
-<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/5zshGUCtz9PWZNaQ8" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:54.09%; left:29.06%; width:21.51%; height:21.51%;"></a>
-<div class="hotspot" onclick="s(); event.stopPropagation(); abrirForm('558398579634')" style="top:54.09%; left:51.25%; width:21.36%; height:21.36%;"></div>
-<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:54.09%; left:73.44%; width:21.25%; height:21.25%;"></div>
+<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/5zshGUCtz9PWZNaQ8" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:53.91%; left:29.38%; width:17.38%; height:17.38%;"></a>
+<div class="hotspot" onclick="s(); event.stopPropagation(); abrirForm('558398579634')" style="top:53.91%; left:50.00%; width:17.29%; height:17.29%;"></div>
+<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:54.44%; left:72.50%; width:22.36%; height:22.36%;"></div>
 </div>
 <div class="page " id="pg4" onclick="rv()"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag4_hktebn.jpg"></div></div>
 
@@ -78,9 +78,34 @@
     const hasP2 = true, hasP3 = true;
     let lastPg = 1, iniciado = false, currentZap = "";
     
+    // Pede ao iOS a categoria de áudio "playback" (a mesma que apps de música/vídeo usam).
+    // Isso faz o som da página IGNORAR o interruptor físico de silencioso do iPhone
+    // (por padrão o Safari usa a categoria "ambient", que o interruptor corta) e continua
+    // permitindo vários sons tocando juntos na mesma página. Suportado a partir do
+    // Safari/iOS 16.4; em navegadores sem essa API o comportamento antigo é mantido.
+    function pedirSessaoDeAudio(){
+        try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch(e) {}
+    }
+
+    // Ao trocar de página, para e remuta qualquer vídeo que não seja o da página atual,
+    // pra não deixar o áudio de um vídeo antigo (ex: pulado) tocando escondido.
+    function pararVideosOcultos(atual){
+        document.querySelectorAll('.page video').forEach(v=>{
+            if(v !== atual){ v.pause(); v.muted = true; }
+        });
+    }
+    function tocarPagina(n){
+        const pagina = document.getElementById('pg'+n);
+        const video = pagina ? pagina.querySelector('video') : null;
+        pararVideosOcultos(video);
+        if(video){ video.muted = false; video.play().catch(()=>{}); }
+    }
+
     function s(el){ 
         if(iniciado) return; iniciado = true;
         if(el && el.tagName === 'DIV') el.removeAttribute('onclick');
+        
+        pedirSessaoDeAudio();
         
         mu.load(); 
         mu.volume = 0.8;
@@ -91,11 +116,10 @@
             if("sim"==='sim' && hasP3) sk.style.display='block'; 
             g(2); 
             const v2=document.getElementById('v2'); 
-            if(v2 && v2.tagName==='VIDEO'){ v2.play().catch(()=>{}); v2.onended=()=> { if(hasP3) g(3); } }
+            if(v2 && v2.tagName==='VIDEO'){ v2.onended=()=> { if(hasP3) g(3); } }
             else if(hasP3) { setTimeout(()=>g(3),4000); } 
         } else {
-            const vAct = document.querySelector('.page.active video');
-            if(vAct) { vAct.muted = false; vAct.play().catch(()=>{}); }
+            g(1);
         }
     }
     
@@ -108,10 +132,7 @@
         const t=document.getElementById('pg'+n); 
         if(t){
             t.classList.add('active'); 
-            const v=t.querySelector('video'); 
-            if(v) { 
-                if(iniciado) { v.muted = false; v.play().catch(()=>{}); } 
-            }
+            if(iniciado) tocarPagina(n);
         }
     }
     
