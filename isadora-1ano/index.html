@@ -31,7 +31,7 @@
 </head>
 <body>
 <div class="app-container">
-    <audio id="m" src="https://res.cloudinary.com/igtlabss/video/upload/v1790443204/audio_apszkm.mp3" loop preload="auto"></audio>
+    <audio id="m" src="https://res.cloudinary.com/igtlabss/video/upload/v1790636441/audio_dr43hd.mp3" loop preload="auto"></audio>
     <button id="btn-s" onclick="t()">II</button>
     <button id="skip" onclick="g(3)">PULAR</button>
 
@@ -47,14 +47,14 @@
         </div>
     </div>
 
-    <div class="page active" id="pg1" onclick="s(this)"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/capa_oqzstx.jpg"></div><div class="hotspot" onclick="s(); event.stopPropagation(); g(2)" style="top:68.00%; left:50.94%; width:61.50%; height:61.50%;"></div>
+    <div class="page active" id="pg1" onclick="s(this)"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/capa_oqzstx.jpg"></div><div class="hotspot" onclick="s(); event.stopPropagation(); g(2)" style="top:50.04%; left:45.31%; width:202.72%; height:202.72%;"></div>
 </div>
-<div class="page " id="pg2" ><div class="media-wrapper"><video id="v2" src="https://res.cloudinary.com/igtlabss/video/upload/v1790443342/pag2_f9rpbv.mp4" playsinline muted></video></div></div>
-<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/NPfubMyy2VWn323q9?g_st=ic" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:53.91%; left:29.38%; width:16.51%; height:16.51%;"></a>
-<div class="hotspot" onclick="s(); event.stopPropagation(); abrirForm('558398579634')" style="top:54.09%; left:50.00%; width:16.50%; height:16.50%;"></div>
-<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:53.74%; left:70.31%; width:15.44%; height:15.44%;"></div>
+<div class="page " id="pg2" ><div class="media-wrapper"><video id="v2" src="https://res.cloudinary.com/igtlabss/video/upload/v1790636473/pagina2_pyfqsv.mp4" playsinline muted></video></div></div>
+<div class="page " id="pg3" ><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag3_d9q1cn.jpg"></div><a href="https://maps.app.goo.gl/NPfubMyy2VWn323q9?g_st=ic" target="_blank" class="hotspot" onclick="s(); event.stopPropagation()" style="top:53.91%; left:29.38%; width:16.01%; height:16.01%;"></a>
+<div class="hotspot" onclick="s(); event.stopPropagation(); abrirForm('558398579634')" style="top:53.91%; left:50.31%; width:17.51%; height:17.51%;"></div>
+<div class="hotspot" onclick="s(); event.stopPropagation(); g(4)" style="top:54.26%; left:70.00%; width:17.41%; height:17.41%;"></div>
 </div>
-<div class="page " id="pg4" onclick="rv()"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag4_hktebn.jpg"></div><div class="hotspot" onclick="s(); event.stopPropagation(); g(3)" style="top:69.93%; left:50.94%; width:12.50%; height:12.50%;"></div>
+<div class="page " id="pg4" onclick="rv()"><div class="media-wrapper"><img src="https://res.cloudinary.com/igtlabss/image/upload/v1790443191/pag4_hktebn.jpg"></div><div class="hotspot" onclick="s(); event.stopPropagation(); g(3)" style="top:69.40%; left:50.94%; width:14.59%; height:14.59%;"></div>
 </div>
 
 
@@ -93,7 +93,7 @@
         
         btn.style.display='flex'; 
         if (hasP2) { 
-            if("sim"==='sim' && hasP3) sk.style.display='block'; 
+            if("nao"==='sim' && hasP3) sk.style.display='block'; 
             g(2); 
             const v2=document.getElementById('v2'); 
             if(v2 && v2.tagName==='VIDEO'){ v2.play().catch(()=>{}); v2.onended=()=> { if(hasP3) g(3); } }
@@ -108,7 +108,7 @@
         if(n <= 3) lastPg = n; 
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         if(n==3 || (!hasP3 && n==2) || (!hasP2 && n==1) || n > 3) sk.style.display='none';
-        else if ("sim"==='sim' && hasP3 && n < 3) sk.style.display='block';
+        else if ("nao"==='sim' && hasP3 && n < 3) sk.style.display='block';
         tm.style.display = ("nao"==='sim' && n=="3") ? 'block' : 'none';
         const t=document.getElementById('pg'+n); 
         if(t){
